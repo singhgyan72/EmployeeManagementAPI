@@ -21,6 +21,8 @@ namespace EmployeeManagementAPI.Repository
 
             modelBuilder.ApplyConfiguration(new CompanyConfiguration());
             modelBuilder.ApplyConfiguration(new EmployeeConfiguration());
+
+            //TODO: Uncomment this line to seed the roles [currenlty its throwing exception while update-database]
             //modelBuilder.ApplyConfiguration(new RoleConfiguration());
         }
 

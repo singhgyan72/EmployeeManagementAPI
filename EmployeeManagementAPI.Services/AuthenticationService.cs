@@ -46,6 +46,9 @@ namespace EmployeeManagementAPI.Services
             if (result.Succeeded)
                 await _userManager.AddToRolesAsync(user, userForRegistration.Roles);
 
+            //If you want, before calling AddToRoleAsync or AddToRolesAsync, you can check if roles exist in the database.
+            //But for that, you have to inject RoleManager<TRole> and use the RoleExistsAsync method.
+
             return result;
         }
 

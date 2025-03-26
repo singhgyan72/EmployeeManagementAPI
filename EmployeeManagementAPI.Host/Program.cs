@@ -6,6 +6,7 @@ using EmployeeManagementAPI.Services.DataShaping;
 using EmployeeManagementAPI.SharedResources.DTO;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using NLog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,9 +23,8 @@ builder.Services.ConfigureRepositoryManager();
 builder.Services.ConfigureServiceManager();
 builder.Services.ConfigureSqlContext(builder.Configuration);
 builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.ConfigureValidationFilter();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
-//Suppress [APIController] default behaviour
-builder.Services.Configure<ApiBehaviorOptions>(options => { options.SuppressModelStateInvalidFilter = true; });
 builder.Services.AddScoped<IDataShaper<EmployeeDto>, DataShaper<EmployeeDto>>();
 builder.Services.ConfigureVersioning();
 //builder.Services.ConfigureResponseCaching();
@@ -32,6 +32,13 @@ builder.Services.ConfigureOutputCaching();
 builder.Services.ConfigureRateLimitingOptions();
 builder.Services.AddAuthentication();
 builder.Services.ConfigureIdentity();
+builder.Services.ConfigureJWT(builder.Configuration);
+builder.Services.ConfigureSwagger();
+
+//we are suppressing a default model state validation that is implemented due to
+//the existence of the [ApiController] attribute in all API controllers.
+builder.Services.Configure<ApiBehaviorOptions>(options => { options.SuppressModelStateInvalidFilter = true; });
+
 //builder.Services.AddScoped<ValidateMediaTypeAttribute>();
 
 //This method registers only the controllers in IServiceCollection and not Views or Pages
@@ -80,6 +87,13 @@ app.UseOutputCache();
 app.UseAuthentication();
 //adds the authorization middleware to the specified IApplicationBuilder to enable authorization capabilities.
 app.UseAuthorization();
+
+app.UseSwagger();
+app.UseSwaggerUI(s =>
+{
+    s.SwaggerEndpoint("/swagger/v1/swagger.json", "Employee Management API v1");
+    s.SwaggerEndpoint("/swagger/v2/swagger.json", "Employee Management API v2");
+});
 
 //adds the endpoints from controller actions to the IEndpointRouteBuilder
 app.MapControllers();
